@@ -1,3 +1,79 @@
+import { createClient } from '@supabase/supabase-js';
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+// 在 GermanyTripApp 組件內部修改
+
+export default function TravelApp() {
+
+  // ... 其他狀態設定 ...
+
+
+
+  // 當選擇日期時，從資料庫抓取資料
+
+  useEffect(() => {
+
+    const fetchData = async () => {
+
+      let { data } = await supabase
+
+        .from('itineraries')
+
+        .select('*')
+
+        .eq('date', selectedDate)
+
+        .single();
+
+      
+
+      if (data) {
+
+        setItineraries((prev: any) => ({ ...prev, [selectedDate]: data.events }));
+
+      }
+
+    };
+
+    fetchData();
+
+  }, [selectedDate]);
+
+
+
+  // 當儲存編輯時，同步回傳資料庫
+
+  const saveToDB = async (updatedDay: any) => {
+
+    const { error } = await supabase
+
+      .from('itineraries')
+
+      .upsert({ date: selectedDate, events: updatedDay });
+
+    
+
+    if (error) alert("同步失敗：" + error.message);
+
+  };
+
+
+
+  // 修改 handleUpdate，在最後呼叫 saveToDB
+
+  const handleUpdate = (id: number, field: string, value: string) => {
+
+    const updatedEvents = currentDay.events.map((e: any) => e.id === id ? { ...e, [field]: value } : e);
+
+    const updatedDay = { ...currentDay, events: updatedEvents };
+
+    setItineraries({ ...itineraries, [selectedDate]: updatedDay });
+
+    saveToDB(updatedDay); // 這裡會把內容存進資料庫
+
+  };
 "use client";
 import React, { useState } from 'react';
 import { MapPin, Sun, Plus, CloudRain, Sunset, Navigation, Hotel, Clock, Info, Save, Edit3, Trash2, Car, Castle, UtensilsCrossed } from 'lucide-react';
@@ -178,4 +254,5 @@ export default function TravelApp() {
       </div>
     </div>
   );
+}
 }
