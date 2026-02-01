@@ -33,7 +33,7 @@ export default function TravelApp() {
     const fetchData = async () => {
       const { data } = await supabase.from('itineraries').select('*').eq('date', selectedDate).single();
       if (data) {
-        setItineraries((prev: any) => ({ ...prev, [selectedDate]: data.events_data }));
+        setItineraries((prev: any) => ({ ...prev, [selectedDate]: data.events }));
       }
     };
     fetchData();
